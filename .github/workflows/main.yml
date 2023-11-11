@@ -1,0 +1,28 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          cache: pip
+      - run: |
+          pip install --upgrade autopep8
+          autopep8 --recursive --diff --max-line-length 120  "${GITHUB_WORKSPACE}"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          cache: pip
+      - run: |
+          pip install --upgrade flake8
+          flake8 --max-line-length 120 "${GITHUB_WORKSPACE}"
