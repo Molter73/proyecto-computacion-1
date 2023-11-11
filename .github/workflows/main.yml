@@ -16,7 +16,7 @@ jobs:
           cache: pip
       - run: |
           pip install --upgrade autopep8
-          autopep8 --recursive --diff --max-line-length 120  "${GITHUB_WORKSPACE}"
+          autopep8 --recursive --diff --max-line-length 120 --exit-code "${GITHUB_WORKSPACE}"
 
   lint:
     runs-on: ubuntu-latest
