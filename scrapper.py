@@ -30,7 +30,7 @@ def extraer_texto_ia(soup):
 def extraer_texto_humano(soup):
     return [
         ' '.join([
-             limpiar(s.text) for s in soup.find_all('p', class_='pb-2 whitespace-prewrap')
+            limpiar(s.text) for s in soup.find_all('p', class_='pb-2 whitespace-prewrap')
         ])
     ]
 
