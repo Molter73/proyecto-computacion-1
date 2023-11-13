@@ -1,4 +1,8 @@
+import argparse
+import json
 import requests
+import sys
+
 from bs4 import BeautifulSoup
 
 urls_prueba = ['https://sharegpt.com/c/W4t1net',
@@ -12,7 +16,8 @@ urls_prueba = ['https://sharegpt.com/c/W4t1net',
 
 
 def consultar(url):
-    respuesta = requests.get(url)
+    respuesta = requests.get(url.strip())
+    respuesta.raise_for_status()
     return BeautifulSoup(respuesta.content, 'html.parser')
 
 
@@ -29,9 +34,7 @@ def extraer_texto_ia(soup):
 
 def extraer_texto_humano(soup):
     return [
-        ' '.join([
-            limpiar(s.text) for s in soup.find_all('p', class_='pb-2 whitespace-prewrap')
-        ])
+        limpiar(s.text) for s in soup.find_all('p', class_='pb-2 whitespace-prewrap')
     ]
 
 
@@ -47,19 +50,34 @@ def limpiar(texto):
     return info_tab
 
 
-def main():
+def scrap(url):
+    soup = consultar(url)
+    return extraer_texto(soup)
+
+
+def main(input, output):
     generado = []
     humano = []
 
-    for url in urls_prueba:
-        soup = consultar(url)
-        g, h = extraer_texto(soup)
+    for url in input.readlines():
+        g, h = scrap(url)
         generado.extend(g)
         humano.extend(h)
 
-    print(f'Texto máquina: {generado}')
-    print(f'Texto humano: {humano}')
+    json.dump({
+        'generado': generado,
+        'humano': humano
+    }, output)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input', type=str, default=None,
+                        help='path a un archivo con las URL a scrappear.')
+    parser.add_argument('-o', '--output', type=str, default=None,
+                        help='path al archivo de salida a generar')
+    args = parser.parse_args()
+
+    output = sys.stdout if args.output is None else open(args.output, 'w')
+    with open(args.input, 'r') as input:
+        main(input, output)
