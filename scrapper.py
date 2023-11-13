@@ -5,15 +5,6 @@ import sys
 
 from bs4 import BeautifulSoup
 
-urls_prueba = ['https://sharegpt.com/c/W4t1net',
-               'https://sharegpt.com/c/kOXvnoV',
-               'https://sharegpt.com/c/zqsgTmL',
-               'https://sharegpt.com/c/txUfYs7',
-               'https://sharegpt.com/c/InxbgrS',
-               'https://sharegpt.com/c/wVi0HAu',
-               'https://sharegpt.com/c/QpYpmyQ'
-               ]
-
 
 def consultar(url):
     respuesta = requests.get(url.strip())
