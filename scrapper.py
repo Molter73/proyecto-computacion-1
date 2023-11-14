@@ -60,6 +60,7 @@ def main(input, output):
         'humano': humano
     }, output)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('input', type=str, default=None,
