@@ -1,14 +1,18 @@
 import argparse
-import json
 import sys
+
+import pandas as pd
 
 from crawler import crawl, leer_clave
 from scrapper import scrap
+from cleaner import clean, exportar_archivo
 
 
 def main(api_key, output, count):
+    print("Crawling ShareGPT...")
     urls = crawl(api_key, count)
 
+    print("Scrapping ShareGPT...")
     generado = []
     humano = []
     for url in urls:
@@ -16,10 +20,12 @@ def main(api_key, output, count):
         generado.extend(g)
         humano.extend(h)
 
-    json.dump({
-        'generado': generado,
-        'humano': humano
-    }, output)
+    print("Limpiando y exportando resultados...")
+    df_generado = clean(generado, 'IA')
+    df_humano = clean(humano, 'HUMANO')
+    df = pd.concat([df_generado, df_humano])
+
+    exportar_archivo(df, output)
 
 
 if __name__ == '__main__':

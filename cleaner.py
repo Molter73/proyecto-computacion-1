@@ -1,5 +1,8 @@
+import argparse
+import json
+import sys
+
 from langdetect import detect
-from scrapper import main as scrap
 import pandas as pd
 
 
@@ -19,20 +22,26 @@ def exportar_archivo(df, archivo_tsv):
     df.reset_index(drop=True, inplace=True)
     df['ID'] = df.index
     df.to_csv(archivo_tsv, sep='\t', index=False)
-    print(f'Se exportó el archivo: {archivo_tsv}')
 
 
-def main():
-    generado, humano = scrap()
+def main(input, output):
+    textos = json.load(input)
 
-    df_generado = clean(generado, 'IA')
-    df_humano = clean(humano, 'HUMANO')
+    df_generado = clean(textos['generado'], 'IA')
+    df_humano = clean(textos['humano'], 'HUMANO')
     df_total = pd.concat([df_generado, df_humano])
 
-    archivo_tsv = 'ejemplo.tsv'
-
-    exportar_archivo(df_total, archivo_tsv)
+    exportar_archivo(df_total, output)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input', type=str,
+                        help='path a un archivo json con los textos a limpiar')
+    parser.add_argument('-o', '--output', type=str, default=None,
+                        help='path al archivo de salida')
+
+    args = parser.parse_args()
+    input = open(args.input, 'r')
+    output = sys.stdout if args.output is None else open(args.output, 'w')
+    main(input, output)
