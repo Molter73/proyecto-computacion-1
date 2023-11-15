@@ -15,9 +15,10 @@ def leer_clave(api_key_file):
         return archivo.read().strip()
 
 
-def consultar_api(api_key, count):
+def consultar_api(api_key, count, page):
     payload = json.dumps({
         "q": "site:sharegpt.com",
+        "page": page,
         "num": count,
     })
 
@@ -29,19 +30,24 @@ def consultar_api(api_key, count):
     response = requests.request("POST", url, headers=headers, data=payload)
     response.raise_for_status()
 
-    return response.json()
+    return response.json()['organic']
 
 
 def limpiar_resp(respuesta_json):
     urls = []
-    for resultado in respuesta_json["organic"]:
+    for resultado in respuesta_json:
         if "ShareGPT conversation" in resultado["title"]:
             urls.append(resultado["link"])
     return urls
 
 
 def crawl(api_key, count):
-    respuesta = consultar_api(api_key, count)
+    page = 1
+    respuesta = []
+    while count > 0:
+        respuesta.extend(consultar_api(api_key, count, page))
+        count -= 100
+        page += 1
     return limpiar_resp(respuesta)
 
 
