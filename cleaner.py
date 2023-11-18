@@ -1,14 +1,11 @@
 import argparse
-import json
 import sys
 
 from langdetect import detect
 import pandas as pd
 
 
-def clean(elementos, label):
-    df = pd.DataFrame(elementos, columns=['Text'])
-    df['Label'] = label
+def clean(df):
     df.drop_duplicates(subset='Text', inplace=True)
 
     filter_length = df['Text'].str.len() > 20
@@ -25,13 +22,8 @@ def exportar_archivo(df, archivo_tsv):
 
 
 def main(input, output):
-    textos = json.load(input)
-
-    df_generado = clean(textos['generado'], 'IA')
-    df_humano = clean(textos['humano'], 'HUMANO')
-    df_total = pd.concat([df_generado, df_humano])
-
-    exportar_archivo(df_total, output)
+    df = clean(pd.read_csv(input, sep='\t'))
+    exportar_archivo(df, output)
 
 
 if __name__ == '__main__':
