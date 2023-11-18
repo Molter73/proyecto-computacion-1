@@ -1,9 +1,9 @@
 import argparse
-import json
 import requests
 import sys
 
 from bs4 import BeautifulSoup
+import pandas as pd
 
 
 def consultar(url):
@@ -20,19 +20,28 @@ def extraer_texto_ia(soup):
                 limpiar(text.text) for text in s.find_all(['p', 'h1', 'h2', 'h3', 'b', 'p', 'a', 'li'])
             ]))
 
+    result = pd.DataFrame(result, columns=['Text'])
+    result['Label'] = 'IA'
     return result
 
 
 def extraer_texto_humano(soup):
-    return [
+    result = [
         limpiar(s.text) for s in soup.find_all('p', class_='pb-2 whitespace-prewrap')
     ]
 
+    result = pd.DataFrame(result, columns=['Text'])
+    result['Label'] = 'HUMANO'
+    return result
+
 
 def extraer_texto(soup):
-    texto_generado = extraer_texto_ia(soup.find_all('div', class_='utils_response__b5jEi'))
+    texto_generado = extraer_texto_ia(
+        soup.find_all('div', class_='utils_response__b5jEi'))
     texto_humano = extraer_texto_humano(soup)
-    return texto_generado, texto_humano
+
+    df = pd.concat([texto_generado, texto_humano])
+    return df
 
 
 def limpiar(texto):
@@ -47,18 +56,12 @@ def scrap(url):
 
 
 def main(input, output):
-    generado = []
-    humano = []
+    df = pd.DataFrame()
 
     for url in input.readlines():
-        g, h = scrap(url)
-        generado.extend(g)
-        humano.extend(h)
+        df = pd.concat([df, scrap(url)])
 
-    json.dump({
-        'generado': generado,
-        'humano': humano
-    }, output)
+    df.to_csv(output, sep='\t', index=False)
 
 
 if __name__ == '__main__':

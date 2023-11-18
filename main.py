@@ -13,19 +13,12 @@ def main(api_key, output, count):
     urls = crawl(api_key, count)
 
     print("Scrapping ShareGPT...")
-    generado = []
-    humano = []
+    df = pd.DataFrame()
     for url in urls:
-        g, h = scrap(url)
-        generado.extend(g)
-        humano.extend(h)
+        df = pd.concat([df, scrap(url)])
 
     print("Limpiando y exportando resultados...")
-    df_generado = clean(generado, 'IA')
-    df_humano = clean(humano, 'HUMANO')
-    df = pd.concat([df_generado, df_humano])
-
-    exportar_archivo(df, output)
+    exportar_archivo(clean(df), output)
 
 
 if __name__ == '__main__':
