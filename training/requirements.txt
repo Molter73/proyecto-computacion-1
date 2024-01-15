@@ -1,0 +1,8 @@
+scikit-learn
+pandas
+datasets
+evaluate
+transformers
+torch 
+torchvision
+accelerate
