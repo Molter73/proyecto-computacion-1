@@ -126,8 +126,8 @@ def test(test_df, model_path, id2label, label2id):
 # define input arguments
 train_path = "subtaskB_train.jsonl"
 test_path =  "subtaskB_dev.jsonl"
-model_name = "google/bert_uncased_L-8_H-512_A-8" # monolilingual model
-#model_name =  'roberta-base' # monolilingual model (0.65 mF1)
+#model_name = "google/bert_uncased_L-8_H-512_A-8" # monolilingual model
+model_name =  'roberta-base' # monolilingual model (0.65 mF1)
 #model_name =  'xlm-roberta-base' # multilingual model
 subtask =  "B"
 prediction_path = "subtask"+subtask+"_predictions.jsonl"

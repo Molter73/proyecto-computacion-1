@@ -18,32 +18,30 @@ from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from itertools import count
 
+# Definición de funciones para leer conjuntos de datos
+def read_dataset_json(inFile):
+    print("\nLeyendo:", inFile)
+    return pd.read_json(inFile, lines=True)
 
-# read dataset function
-def read_dataset(inFile):
-    print("\nReading:", inFile)
-    data =  pd.read_json(inFile, lines=True)
-    return data
+def read_dataset_csv(inFile):
+    print("\nLeyendo:", inFile)
+    return pd.read_csv(inFile, sep="\t")
 
-# data paths and config
+# Configuración de rutas de datos y configuraciones iniciales
 inTrain = 'subtaskA_train_monolingual.jsonl'
-inTest = 'subtaskA_dev_monolingual.jsonl'
+inTest = 'dataset-test-peque.tsv'
 
-max_instances_per_class = 10000
-max_instances_per_class_test = 2000
+max_instances_per_class = 1500
+max_instances_per_class_test = 1500
+max_features = 20000
+random_seed = 777
 
-max_features = 20000 # maximum number of features extracted for our instances
+# Lectura de los conjuntos de datos
+train_df = read_dataset_json(inTrain)
+test_df = read_dataset_csv(inTest)
 
-random_seed = 777 # set random seed for reproducibility
-id2label = {0: "human", 1: "machine"}
-
-# read dataset
-train_df = read_dataset(inTrain)
-test_df = read_dataset(inTest)
-
-# downsample training data to train faster
+# Reducción de muestras en los conjuntos de datos para un entrenamiento más rápido
 train_df = train_df.groupby("label").sample(n=max_instances_per_class, random_state=random_seed)
-test_df = test_df.groupby("label").sample(n=max_instances_per_class_test, random_state=random_seed)
 
 #Establecemos el número de instancias presentes
 instancias_humanas = len(train_df[train_df['label'] == 0])
@@ -66,20 +64,24 @@ print('Número de instancias generadas:\t\t\t\t\t', instancias_ia)
 print('Longitud media en caracteres de las instancias humanas:\t\t', longitud_media_humanas)
 print('Longitud media en caracteres de las instancias generadas:\t', longitud_media_generado)
 
-# vectorize data: extract features from our data (from text to numeric vectors)
+# Crear y entrenar el LabelEncoder con las etiquetas textuales originales
+le = LabelEncoder()
+le.fit(["human", "machine"])
+
+# Transformar las etiquetas en el conjunto de prueba a su forma numérica
+test_df["label"] = le.transform(test_df["label"])
+
+# Vectorización de los datos: extracción de características de los textos
 vectorizer = TfidfVectorizer(max_features=max_features, stop_words="english", ngram_range=(1,1))
 X_train = vectorizer.fit_transform(train_df["text"])
 X_test = vectorizer.transform(test_df["text"])
 
-# vectorize labels : from text to numeric vectors
-le = LabelEncoder()
-Y_train = le.fit_transform(train_df["label"])
-Y_test = le.transform(test_df["label"])
+# Las etiquetas en train_df ya están en formato numérico
+Y_train = train_df["label"]
+Y_test = test_df["label"]
 
-# create model
+# Creación y entrenamiento del modelo
 model = ExtraTreesClassifier()
-
-# train model
 model.fit(X_train, Y_train)
 
 #Imprimimos Tabla de Estadísticas
@@ -90,21 +92,17 @@ print('Número de instancias generadas en el training:\t',len(train_df[train_df[
 print('Número de instancias humanas en el test:\t',len(test_df[test_df['label'] == 0]))
 print('Número de instancias generadas en el test:\t',len(test_df[test_df['label'] == 1]))
 print()
-# get test predictions
-predictions = model.predict(X_test)
 
-# evaluate predictions
-target_names = [label for idx, label in id2label.items()]
+# Evaluación del modelo con el conjunto de prueba
+predictions = model.predict(X_test)
+target_names = ['human', 'machine']
 print(classification_report(Y_test, predictions, target_names=target_names))
 
-# Pickle
-modelA_filename = 'taskA_trained_model.pkl'
-
+# Guardado del modelo entrenado usando pickle
+modelA_filename = 'taskA_Eval_trained_model.pkl'
 with open(modelA_filename, 'wb') as file:
     pickle.dump(model, file)
-
 print(f"Modelo guardado como {modelA_filename}")
-
 
 """
 # classify your own text
@@ -153,4 +151,4 @@ print('{:_<50}\n'.format(""))
 for i, (score, name, model) in enumerate(top_five, start=1):
   recommended = "<- Modelo Recomendado" if model == best_model else ""
   print("{:^5} | {:^25} | {:^13.6f} | {}".format(i, name, score, recommended))
-  """
+"""
