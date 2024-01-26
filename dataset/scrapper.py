@@ -20,8 +20,9 @@ def extraer_texto_ia(soup):
                 limpiar(text.text) for text in s.find_all(['p', 'h1', 'h2', 'h3', 'b', 'p', 'a', 'li'])
             ]))
 
-    result = pd.DataFrame(result, columns=['Text'])
-    result['Label'] = 'IA'
+    result = pd.DataFrame(result, columns=['text'])
+    result['label'] = 1
+    result['model'] = 'chatGPT'
     return result
 
 
@@ -30,8 +31,9 @@ def extraer_texto_humano(soup):
         limpiar(s.text) for s in soup.find_all('p', class_='pb-2 whitespace-prewrap')
     ]
 
-    result = pd.DataFrame(result, columns=['Text'])
-    result['Label'] = 'HUMANO'
+    result = pd.DataFrame(result, columns=['text'])
+    result['label'] = 0
+    result['model'] = 'human'
     return result
 
 
@@ -51,6 +53,7 @@ def limpiar(texto):
 
 
 def scrap(url):
+    print(f'Scrapping {url}...')
     soup = consultar(url)
     return extraer_texto(soup)
 
@@ -60,6 +63,7 @@ def main(input, output):
 
     for url in input.readlines():
         df = pd.concat([df, scrap(url)])
+        print(f'Terminado el scrap de {url}')
 
     df.to_csv(output, sep='\t', index=False)
 

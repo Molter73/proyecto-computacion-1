@@ -6,19 +6,19 @@ import pandas as pd
 
 
 def clean(df):
-    df.drop_duplicates(subset='Text', inplace=True)
+    df.drop_duplicates(subset='text', inplace=True)
 
-    filter_length = df['Text'].str.len() > 20
+    filter_length = df['text'].str.len() > 20
     df = df[filter_length]
-    filter_lang = df['Text'].apply(lambda x: detect(x) == "en")
+    filter_lang = df['text'].apply(lambda x: detect(x) == "en")
     df = df[filter_lang]
     return df
 
 
-def exportar_archivo(df, archivo_tsv):
+def exportar_archivo(df, archivo_salida):
     df.reset_index(drop=True, inplace=True)
-    df['ID'] = df.index
-    df.to_csv(archivo_tsv, sep='\t', index=False)
+    df['id'] = df.index
+    df.to_json(archivo_salida, lines=True, orient='records')
 
 
 def main(input, output):
