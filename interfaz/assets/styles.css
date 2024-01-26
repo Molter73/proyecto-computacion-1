@@ -1,36 +1,50 @@
+body{
+background-color: #1e1b54;;
+}
+
 .titulo_app{
-    color: #1e1b54;
+    color: #edf5c6;
     text-align: center;
     font-size: 30px;
     font-family: 'Source Serif 4', serif;
 }
 
 .titulo_opciones{
-    color: #1e1b54;
+  color: #edf5c6;
     font-size: 20px;
     font-family: 'Source Serif 4', serif;
 }
 
 .opciones{
-    color: #1e1b54;
-    font-size: 15px;
+    color: #ecf3c9;
+    font-size: 16px;
     font-family: 'Source Serif 4', serif;
 }
+
 
 .txt_area{
   width: 100%;
   height: 40vh;
   margin-bottom: 15px;
+  color: #ecf3c9;
+  border-color:#ecf3c9;
+  background-color: #1e1b54;
+  font-size: 15px;
+  font-family: 'Source Serif 4', serif;
+}
+
+.txt_area:focus{
+  outline: none;
 }
 
 .boton_txt_analizar {
   align-items: center;
-  background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#5B42F3);
+  background-image: linear-gradient(144deg,#f5dc2e, 50%, #22afcf);
   border: 0;
   border-radius: 12px;
   box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
   box-sizing: border-box;
-  color: #FFFFFF;
+  color: #1e1b54;
   display: flex;
   font-family:'Source Serif 4', serif;
   font-size: 18px;
@@ -52,10 +66,15 @@
   outline: 0;
 }
 
-
 @media (min-width: 768px) {
   .boton_txt_analizar {
     font-size: 16px;
     min-width: 145px;
   }
+}
+
+.res{
+  color:#ecf3c9;
+  font-size: 16px;
+  font-family: 'Source Serif 4', serif;
 }

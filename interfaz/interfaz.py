@@ -1,8 +1,9 @@
 from dash import Dash, html, dcc, dash_table, Output, Input, callback
+from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
-
-# from api import api
+import requests
+import json
 
 df = pd.read_csv(
     "https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv"
@@ -32,11 +33,11 @@ aplication.layout = html.Div(
             children=dcc.RadioItems(
                 options=[
                     {
-                        "label": "Identificación de textos generados",
+                        "label": "Identificación",
                         "value": "identification",
                     },
                     {
-                        "label": "Atribución de textos a modelos de generación",
+                        "label": "Atribución",
                         "value": "attribution",
                     },
                 ],
@@ -44,7 +45,7 @@ aplication.layout = html.Div(
             ),
         ),
         html.Div([html.H3(className="titulo_opciones", children="Introduce tu texto")]),
-        html.Div([dcc.Textarea(className="txt_area", id="txt_area")]),
+        html.Div([dcc.Textarea(className="txt_area", id="txt_area", value="")]),
         html.Button(
             className="boton_txt_analizar",
             id="button_txt_area",
@@ -56,8 +57,12 @@ aplication.layout = html.Div(
                     className="titulo_opciones",
                     children="Resultados de la clasificación MGT",
                 ),
+                html.Div(id="titulo_res_metricas"),
                 html.Div(id="resultados_metricas"),
-            ]
+                html.P("Task:", className="res", id="p_task"),
+                html.P("Label:", className="res", id="p_label"),
+                html.P("Prob:", className="res", id="p_prob"),
+            ],
         ),
         html.Div(
             [
@@ -89,12 +94,6 @@ aplication.layout = html.Div(
 )
 
 
-# Se llamará a esta función cada vez que se cambie el valor de la entrada para actualizar la salida.
-@callback(
-    # Output(component_id="datos", component_property="figure"),
-    Output(component_id="resultados_metricas", component_property="children"),
-    Input(component_id="button_txt_area", component_property="value"),
-)
 def graphic_features(op_elegida):
     grafica = px.histogram(
         df, x="continent", y=op_elegida, histfunc="avg", color="green"
@@ -102,20 +101,35 @@ def graphic_features(op_elegida):
     return grafica
 
 
-def model_selection(text: str, sel_model):
-    if sel_model == "identification":
-        return identification(text)
-    elif sel_model == "attribution":
-        return attribution(text)
+# Se llamará a esta función cada vez que se cambie el valor de la entrada para actualizar la salida.
+@callback(
+    Output("resultados_metricas", component_property="children"),
+    Input("button_txt_area", component_property="n_clicks"),
+    [State("seleccion_modelo", component_property="value"), State("txt_area", "value")],
+)
+def model_selection(text, classification):
+    data = {"text": text, "classification": classification}
+    data_to_json = json.dumps(data)
+
+    response = requests.post("http://127.0.0.1:5000", data=data_to_json)
+    if response.status_code == 200:
+        print("Solicitud exitosa")
+        print(response.json())
+    else:
+        print("Solicitud fallida")
+
+    return {
+        "text": text,
+        "classification": classification,
+    }
 
 
-# def push_button():
-
-
-"""def get_metrics(text: str):
-    results = make_response(text)
-    return ...
-"""
+def get_metrics(task, label, prob):
+    return {
+        "task": task,
+        "label": label,
+        "prob": prob,
+    }
 
 
 if __name__ == "__main__":
