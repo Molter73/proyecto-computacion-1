@@ -39,6 +39,14 @@ def proba(pipeline, X, y):
     return pipeline.predict_proba(X)[0][y]
 
 
+def get_gpu_prediction(pipeline, text):
+    prediction = pipeline(text)[0][0]
+    return {
+        "label": prediction["label"],
+        "proba": prediction["score"],
+    }
+
+
 def get_predictions(models: dict, text):
     predictions = {}
     X = [text]
@@ -55,6 +63,11 @@ def get_predictions(models: dict, text):
                 "label": labels[y],
                 "proba": proba(pipeline, X, y),
             }
+
+    if "GPU" in models.keys():
+        m = models["GPU"]
+        for name, pipeline in m.items():
+            predictions[name] = get_gpu_prediction(pipeline, text)
 
     return predictions
 
