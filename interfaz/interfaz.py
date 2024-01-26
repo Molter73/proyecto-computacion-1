@@ -1,20 +1,20 @@
-from dash import Dash, html, dcc, dash_table, Output, Input, callback
-from dash.dependencies import Input, Output, State
+from dash import Dash, html, dcc, dash_table, Output, Input, State, callback
+from dash.exceptions import PreventUpdate
 import plotly.express as px
 import pandas as pd
 import requests
-import json
 
 df = pd.read_csv(
     "https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv"
 )
+font = "https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Source+Serif+4:opsz@8..60&display=swap"
 # Inicializamos la aplicación
-aplication = Dash(__name__)
+application = Dash(__name__)
 
-aplication.layout = html.Div(
+application.layout = html.Div(
     [
         html.Link(
-            href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Source+Serif+4:opsz@8..60&display=swap",
+            href=font,
             rel="stylesheet",
         ),
         html.Div(
@@ -26,7 +26,8 @@ aplication.layout = html.Div(
             ]
         ),
         html.Div(
-            [html.H3(className="titulo_opciones", children="Selecciona un modelo")]
+            [html.H3(className="titulo_opciones",
+                     children="Selecciona un modelo")]
         ),
         html.Div(
             className="opciones",
@@ -44,7 +45,8 @@ aplication.layout = html.Div(
                 id="seleccion_modelo",
             ),
         ),
-        html.Div([html.H3(className="titulo_opciones", children="Introduce tu texto")]),
+        html.Div([html.H3(className="titulo_opciones",
+                 children="Introduce tu texto")]),
         html.Div([dcc.Textarea(className="txt_area", id="txt_area", value="")]),
         html.Button(
             className="boton_txt_analizar",
@@ -105,34 +107,37 @@ def graphic_features(op_elegida):
 @callback(
     Output("resultados_metricas", component_property="children"),
     Input("button_txt_area", component_property="n_clicks"),
-    [State("seleccion_modelo", component_property="value"), State("txt_area", "value")],
+    State("seleccion_modelo", component_property="value"),
+    State("txt_area", "value"),
 )
-def model_selection(text, classification):
-    data = {"text": text, "classification": classification}
-    data_to_json = json.dumps(data)
+def odel_selection(n_clicks, classification, text):
+    if classification is None or text is None:
+        raise PreventUpdate
 
-    response = requests.post("http://127.0.0.1:5000", data=data_to_json)
-    if response.status_code == 200:
-        print("Solicitud exitosa")
-        print(response.json())
-    else:
-        print("Solicitud fallida")
-
-    return {
+    response = requests.post("http://127.0.0.1:5000", json={
         "text": text,
-        "classification": classification,
-    }
+        "classification": classification
+    })
 
+    if not response.ok:
+        return html.P(response.json()["error"], className="res")
 
-def get_metrics(task, label, prob):
-    return {
-        "task": task,
-        "label": label,
-        "prob": prob,
-    }
+    data = [
+        {
+            "Modelo": name,
+            "Label": values["label"],
+            "Probabilidad": values["proba"] if values["proba"] is not None else "NA",
+        } for name, values in response.json()["predictions"].items()
+    ]
+
+    return dash_table.DataTable(
+        data=data,
+        page_size=12,
+        style_table={"overflowX": "auto"},
+    )
 
 
 if __name__ == "__main__":
-    aplication.run(
+    application.run(
         debug=True
     )  # La aplicación se reiniciará automáticamente cada vez que se haga un cambio.
