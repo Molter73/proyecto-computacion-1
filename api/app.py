@@ -2,6 +2,9 @@ import os
 
 from flask import Flask, request, abort, jsonify
 
+from . import MODELS
+
+
 app = Flask(__name__)
 
 # Configuración del proxy
@@ -16,7 +19,7 @@ if proxy == "true":
 def main():
     data = request.get_json()
     text = data["text"]
-    classification = data.get("classification", "identification")
+    classification = data.get("classification", "")
 
     if classification == "identification":
         return identification(text)
@@ -30,17 +33,43 @@ def bad_request(e):
     return jsonify(error=str(e)), 400
 
 
-def make_response(task: str, label: str, prob: float):
-    return {
-        "task": task,
-        "label": label,
-        "prob": prob,
-    }
+def proba(pipeline, X, y):
+    if not hasattr(pipeline, "predict_proba"):
+        return None
+    return pipeline.predict_proba(X)[0][y]
+
+
+def get_predictions(models: dict, text):
+    predictions = {}
+    X = [text]
+
+    if "CPU" in models.keys():
+        m = models["CPU"]
+        labels = m["labels"]
+
+        for name, values in m["models"].items():
+            pipeline = values["pipeline"]
+
+            y = pipeline.predict(X)[0]
+            predictions[name] = {
+                "label": labels[y],
+                "proba": proba(pipeline, X, y),
+            }
+
+    return predictions
 
 
 def identification(text: str):
-    return make_response("identification", "HUMANO", 0.75)
+    models = MODELS["identification"]
+    return {
+        "task": "identification",
+        "predictions": get_predictions(models, text),
+    }
 
 
 def attribution(text: str):
-    return make_response("attribution", "chatGPT", 0.8)
+    models = MODELS["attribution"]
+    return {
+        "task": "attribution",
+        "predictions": get_predictions(models, text),
+    }
