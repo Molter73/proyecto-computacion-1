@@ -79,3 +79,5 @@ MODELS = {
     "identification": load_models(identification_models),
     "attribution": load_models(attribution_models),
 }
+
+print("Initialization done")

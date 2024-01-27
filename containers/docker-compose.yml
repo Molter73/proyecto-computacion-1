@@ -1,0 +1,25 @@
+services:
+  apache:
+    image: quay.io/mmoltras/classifiers:apache
+    container_name: classifiers-apache
+    ports:
+    - 80:80
+    networks:
+    - com
+
+  api:
+    image: quay.io/mmoltras/classifiers:api
+    container_name: classifiers-api
+    networks:
+    - com
+    environment:
+      PYTHONUNBUFFERED: 'TRUE'
+
+  ui:
+    image: quay.io/mmoltras/classifiers:ui
+    container_name: classifiers-ui
+    networks:
+    - com
+
+networks:
+  com:

@@ -1,12 +1,22 @@
+import os
+
 from dash import Dash, html, dcc, dash_table, Output, Input, State, callback
 from dash.exceptions import PreventUpdate
 import requests
 
-# Inicio de la aplicación
-application = Dash(__name__, external_stylesheets=[
-    'https://codepen.io/chriddyp/pen/bWLwgP.css',
-    'https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;900&display=swap'
-])
+# Inicializamos la aplicación
+application = Dash(
+    __name__,
+    external_stylesheets=[
+        'https://codepen.io/chriddyp/pen/bWLwgP.css',
+        'https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;900&display=swap'
+    ],
+    requests_pathname_prefix="/classifiers/",
+)
+
+server = application.server
+
+api_url = os.environ.get("API_URL", "http://localhost:5000")
 
 footer_text = \
     'El proyecto ha sido realizado por Alejandro Delgado, Alzaro Álvarez, Brenda Solórzano y Mauro Moltrasio. 2024.'
@@ -109,9 +119,10 @@ def model_selection(n_clicks, classification, text):
     if classification is None or text is None:
         raise PreventUpdate
 
-    response = requests.post(
-        "http://127.0.0.1:5000", json={"text": text, "classification": classification}
-    )
+    response = requests.post(api_url, json={
+        "text": text,
+        "classification": classification
+    })
 
     if not response.ok:
         return html.P(response.json()["error"], className="res")
