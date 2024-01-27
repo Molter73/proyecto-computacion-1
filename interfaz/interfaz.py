@@ -53,45 +53,6 @@ application.layout = html.Div(
             id="button_txt_area",
             children="Analizar texto",
         ),
-        html.Div(
-            [
-                html.H3(
-                    className="titulo_opciones",
-                    children="Resultados de la clasificación MGT",
-                ),
-                html.Div(id="titulo_res_metricas"),
-                html.Div(id="resultados_metricas"),
-                html.P("Task:", className="res", id="p_task"),
-                html.P("Label:", className="res", id="p_label"),
-                html.P("Prob:", className="res", id="p_prob"),
-            ],
-        ),
-        html.Div(
-            [
-                html.H3(
-                    className="titulo_opciones",
-                    children="Distribución de probabilidad MGT",
-                )
-            ]
-        ),
-        html.Div(
-            className="fila",
-            children=[
-                html.Div(
-                    className="columnas",
-                    children=[
-                        dash_table.DataTable(
-                            data=df.to_dict("records"),
-                            page_size=12,
-                            style_table={"overflowX": "auto"},
-                        )
-                    ],
-                ),
-                html.Div(
-                    className="columnas", children=[dcc.Graph(figure={}, id="datos")]
-                ),
-            ],
-        ),
     ]
 )
 
@@ -110,7 +71,7 @@ def graphic_features(op_elegida):
     State("seleccion_modelo", component_property="value"),
     State("txt_area", "value"),
 )
-def odel_selection(n_clicks, classification, text):
+def model_selection(n_clicks, classification, text):
     if classification is None or text is None:
         raise PreventUpdate
 
