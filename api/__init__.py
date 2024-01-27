@@ -1,5 +1,6 @@
 import os
 import pickle
+from pathlib import Path
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TextClassificationPipeline
 
@@ -7,7 +8,10 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Text
 models_subdir = os.environ.get("API_MODELS", "models")
 
 identification_models = {
-    "pickle": os.path.join(models_subdir, "modelsA.pkl"),
+    "CPU": {
+        'path': os.path.join(models_subdir, "modelsA"),
+        'labels': os.path.join(models_subdir, "labelsA.pkl"),
+    },
     "roberta": os.path.join(models_subdir, "roberta-base", "subtaskA", "best"),
     "gbert": os.path.join(models_subdir, "google", "bert", "subtaskA", "best"),
     "id2label": {0: "human", 1: "machine"},
@@ -15,7 +19,10 @@ identification_models = {
 }
 
 attribution_models = {
-    "pickle": os.path.join(models_subdir, "modelsB.pkl"),
+    "CPU": {
+        'path': os.path.join(models_subdir, "modelsB"),
+        'labels': os.path.join(models_subdir, "labelsB.pkl"),
+    },
     "roberta": os.path.join(models_subdir, "roberta-base", "subtaskB", "best"),
     "gbert": os.path.join(models_subdir, "google", "bert", "subtaskB", "best"),
     "id2label": {
@@ -37,6 +44,32 @@ attribution_models = {
 }
 
 
+def load_cpu_models(path, labels_file):
+    if not os.path.isfile(labels_file):
+        return {}
+
+    cpu = {}
+    with open(labels_file, 'rb') as f:
+        labels = pickle.load(f)
+
+    for file in [
+        os.path.join(path, f) for f in os.listdir(path)
+        if os.path.isfile(os.path.join(path, f))
+    ]:
+        name = Path(file).stem
+        print(f"Loading {name}")
+        with open(file, "rb") as f:
+            cpu[name] = pickle.load(f)
+
+    if not cpu:
+        return {}
+
+    return {
+        'models': cpu,
+        'labels': labels,
+    }
+
+
 def load_gpu_model(path, id2label, label2id):
     tokenizer = AutoTokenizer.from_pretrained(path)
     model = AutoModelForSequenceClassification.from_pretrained(
@@ -49,17 +82,20 @@ def load_gpu_model(path, id2label, label2id):
 def load_models(models):
     res = {}
     gpu = {}
+    cpu = {}
 
-    pickle_file = models["pickle"]
+    cpu_dir = models["CPU"]["path"]
+    cpu_labels = models["CPU"]["labels"]
     roberta_dir = models["roberta"]
     gbert_dir = models["gbert"]
     id2label = models["id2label"]
     label2id = models["label2id"]
 
-    if os.path.isfile(pickle_file):
-        print("Loading pickle")
-        with open(pickle_file, "rb") as f:
-            res["CPU"] = pickle.load(f)
+    if os.path.isdir(cpu_dir):
+        cpu = load_cpu_models(cpu_dir, cpu_labels)
+
+    if cpu:
+        res["CPU"] = cpu
 
     if os.path.isdir(roberta_dir):
         print("Loading roberta")

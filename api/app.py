@@ -55,9 +55,7 @@ def get_predictions(models: dict, text):
         m = models["CPU"]
         labels = m["labels"]
 
-        for name, values in m["models"].items():
-            pipeline = values["pipeline"]
-
+        for name, pipeline in m["models"].items():
             y = pipeline.predict(X)[0]
             predictions[name] = {
                 "label": labels[y],
