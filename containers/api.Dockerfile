@@ -17,5 +17,5 @@ ENV BIND_IP="0.0.0.0:8000"
 EXPOSE 8000
 
 ENTRYPOINT ["gunicorn"]
-CMD ["-c", "/app/gunicorn.conf.py", "app.app:app"]
+CMD ["-c", "/app/gunicorn.conf.py", "app:create_app()"]
 

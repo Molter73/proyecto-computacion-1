@@ -12,8 +12,6 @@ services:
     container_name: classifiers-api
     networks:
     - com
-    environment:
-      PYTHONUNBUFFERED: 'TRUE'
 
   ui:
     image: quay.io/mmoltras/classifiers:ui

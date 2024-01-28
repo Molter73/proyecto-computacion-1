@@ -2,6 +2,7 @@ import os
 import pickle
 from pathlib import Path
 
+from flask import Flask, current_app as app
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TextClassificationPipeline
 
 
@@ -57,7 +58,7 @@ def load_cpu_models(path, labels_file):
         if os.path.isfile(os.path.join(path, f))
     ]:
         name = Path(file).stem
-        print(f"Loading {name}")
+        app.logger.info(f"Loading {file}")
         with open(file, "rb") as f:
             cpu[name] = pickle.load(f)
 
@@ -98,11 +99,11 @@ def load_models(models):
         res["CPU"] = cpu
 
     if os.path.isdir(roberta_dir):
-        print("Loading roberta")
+        app.logger.info(f"Loading {roberta_dir}")
         gpu["roberta"] = load_gpu_model(roberta_dir, id2label, label2id)
 
     if os.path.isdir(gbert_dir):
-        print("Loading gbert")
+        app.logger.info(f"Loading {gbert_dir}")
         gpu["gbert"] = load_gpu_model(roberta_dir, id2label, label2id)
 
     if gpu:
@@ -111,9 +112,30 @@ def load_models(models):
     return res
 
 
-MODELS = {
-    "identification": load_models(identification_models),
-    "attribution": load_models(attribution_models),
-}
+def create_app():
+    app = Flask(__name__)
 
-print("Initialization done")
+    if "gunicorn" in os.environ.get("SERVER_SOFTWARE", ""):
+        import logging
+        gunicorn_log = logging.getLogger('gunicorn.error')
+        app.logger.handlers = gunicorn_log.handlers
+        app.logger.setLevel(gunicorn_log.level)
+
+    # Configuración del proxy
+    proxy = os.environ.get("PROXY", "false")
+    if proxy == "true":
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1,
+                                x_proto=1, x_host=1, x_prefix=1)
+
+    with app.app_context():
+        app.models = {
+            "identification": load_models(identification_models),
+            "attribution": load_models(attribution_models),
+        }
+
+    from .app import classifiers
+    app.register_blueprint(classifiers)
+
+    app.logger.info("Initialization done")
+    return app
