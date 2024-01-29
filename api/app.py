@@ -38,11 +38,12 @@ def get_gpu_prediction(pipeline, text):
 
 def get_predictions(models: dict, text):
     predictions = {}
-    X = [text]
 
     if "CPU" in models.keys():
         m = models["CPU"]
         labels = m["labels"]
+        vectorizer = m['vectorizer']
+        X = vectorizer.transform([text])
 
         for name, pipeline in m["models"].items():
             y = pipeline.predict(X)[0]

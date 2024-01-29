@@ -12,6 +12,7 @@ identification_models = {
     "CPU": {
         'path': os.path.join(models_subdir, "modelsA"),
         'labels': os.path.join(models_subdir, "labelsA.pkl"),
+        'vectorizer': os.path.join(models_subdir, "vectorizerA.pkl"),
     },
     "roberta": os.path.join(models_subdir, "roberta-base", "subtaskA", "best"),
     "gbert": os.path.join(models_subdir, "google", "bert", "subtaskA", "best"),
@@ -23,6 +24,7 @@ attribution_models = {
     "CPU": {
         'path': os.path.join(models_subdir, "modelsB"),
         'labels': os.path.join(models_subdir, "labelsB.pkl"),
+        'vectorizer': os.path.join(models_subdir, "vectorizerB.pkl"),
     },
     "roberta": os.path.join(models_subdir, "roberta-base", "subtaskB", "best"),
     "gbert": os.path.join(models_subdir, "google", "bert", "subtaskB", "best"),
@@ -45,13 +47,18 @@ attribution_models = {
 }
 
 
-def load_cpu_models(path, labels_file):
-    if not os.path.isfile(labels_file):
+def load_cpu_models(path, labels_file, vectorizer_file):
+    if not os.path.isfile(labels_file) or not os.path.isfile(vectorizer_file):
         return {}
 
     cpu = {}
     with open(labels_file, 'rb') as f:
+        app.logger.info(f"Loading {labels_file}")
         labels = pickle.load(f)
+
+    with open(vectorizer_file, 'rb') as f:
+        app.logger.info(f"Loading {vectorizer_file}")
+        vectorizer = pickle.load(f)
 
     for file in [
         os.path.join(path, f) for f in os.listdir(path)
@@ -68,6 +75,7 @@ def load_cpu_models(path, labels_file):
     return {
         'models': cpu,
         'labels': labels,
+        'vectorizer': vectorizer,
     }
 
 
@@ -87,13 +95,14 @@ def load_models(models):
 
     cpu_dir = models["CPU"]["path"]
     cpu_labels = models["CPU"]["labels"]
+    cpu_vectorizer = models["CPU"]["vectorizer"]
     roberta_dir = models["roberta"]
     gbert_dir = models["gbert"]
     id2label = models["id2label"]
     label2id = models["label2id"]
 
     if os.path.isdir(cpu_dir):
-        cpu = load_cpu_models(cpu_dir, cpu_labels)
+        cpu = load_cpu_models(cpu_dir, cpu_labels, cpu_vectorizer)
 
     if cpu:
         res["CPU"] = cpu

@@ -11,7 +11,7 @@ application = Dash(
         'https://codepen.io/chriddyp/pen/bWLwgP.css',
         'https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;900&display=swap'
     ],
-    requests_pathname_prefix="/classifiers/",
+    requests_pathname_prefix=os.environ.get("UI_PREFIX", "/"),
 )
 
 server = application.server
