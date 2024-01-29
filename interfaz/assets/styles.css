@@ -1,80 +1,172 @@
+.cursor {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #e3ef86;
+  border-radius: 50%;
+  top: var(--y, 0);
+  left: var(--x, 0);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  mix-blend-mode: difference;
+  transition: transform .2s;
+  pointer-events: none;
+}
+
 body{
-background-color: #1e1b54;;
+background-color:#000000;
+cursor: none;
 }
 
 .titulo_app{
-    color: #edf5c6;
-    text-align: center;
-    font-size: 30px;
-    font-family: 'Source Serif 4', serif;
+  color: #cee0e0;
+  font-family: 'Red Hat Display', sans-serif;
+  width: 100%;
+  max-width: 100vw;
+  text-align: center;
+  padding: 20px;
+  font-size: 6.5vw;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 90%;
 }
 
+.separador{
+  color: #cee0e0;
+  border-top: 1px solid;
+  width: 100%;
+}
+
+.separador_divs{
+  width: 70%;
+  justify-content: left;
+  color: #cee0e0;
+  border-top: 1px solid;
+  margin-top: 90px;
+}
+
+.espacios{
+margin: 120px;
+width: 100%;
+height: 100%;
+background-color: transparent;
+}
+
+.opt_1{
+  min-width: 31%;
+  max-width: 31%;
+  min-height: 32vh;
+  text-align: center;
+  background-color: #151315;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
 .titulo_opciones{
-  color: #edf5c6;
-    font-size: 20px;
-    font-family: 'Source Serif 4', serif;
+  color: #cee0e0;
+  font-family: 'Red Hat Display', sans-serif;
+  width: 95%;
+  max-width: 95vw;
+  text-align: left;
+  padding: 10px;
+  font-size: 2.4vw;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 90%;
 }
 
 .opciones{
-    color: #ecf3c9;
-    font-size: 16px;
-    font-family: 'Source Serif 4', serif;
-}
-
-
-.txt_area{
+  color: #e3ef86;
+  font-family: 'Red Hat Display', sans-serif;
   width: 100%;
-  height: 40vh;
-  margin-bottom: 15px;
-  color: #ecf3c9;
-  border-color:#ecf3c9;
-  background-color: #1e1b54;
-  font-size: 15px;
-  font-family: 'Source Serif 4', serif;
+  max-width: 100vw;
+  text-align:center;
+  padding: 5px;
+  font-size: 2.2vw;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 50%;
 }
 
-.txt_area:focus{
+.opciones label{
+  margin: 23px;
+  justify-content: center;
+  text-align: left;
+}
+
+.titulo_txt_area{
+  color: #cee0e0;
+  font-family: 'Red Hat Display', sans-serif;
+  width: 98%;
+  max-width: 100vw;
+  padding: 10px;
+  font-size: 2.4vw;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 90%;
+}
+
+.txt_d1{
+  color: #cee0e0;
+  font-family: 'Red Hat Display', sans-serif;
+  width: 100%;
+  max-width: 100vw;
+  text-align:left;
+  padding: 30px;
+  margin-top: 10px;
+  font-size: 1.5vw;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 70%;
+  justify-content: left;
+}
+
+.txt_a{
+  width: 40%;
+  height: 50vh;
+  color: #cee0e0;
+  border-color:#e3ef86;
+  background-color: transparent;
+  font-family: 'Red Hat Display', sans-serif;
+  padding: 10px;
+  margin-bottom: 30px;
+  font-size: 1.5vw;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 70%;
+}
+
+.txt_a:focus{
   outline: none;
 }
 
-.boton_txt_analizar {
-  align-items: center;
-  background-image: linear-gradient(144deg,#f5dc2e, 50%, #22afcf);
-  border: 0;
-  border-radius: 12px;
-  box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
-  box-sizing: border-box;
-  color: #1e1b54;
+.boton_txt_analizar{
+  grid-column-gap: 8px;
+  grid-row-gap: 8px;
+  border: 1px solid #e3ef86;
+  background-color: #161616;
+  color: #cee0e0;
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 'Red Hat Display', sans-serif;
+  justify-content: right;
+  padding: 16px 24px;
+  font-weight: 700;
+  transition: all .4s cubic-bezier(.55,.085,.68,.53);
   display: flex;
-  font-family:'Source Serif 4', serif;
-  font-size: 18px;
-  justify-content: center;
-  line-height: 1em;
-  max-width: 100%;
-  min-width: 100px;
-  padding: 8px;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.boton_txt_analizar:active,
-.boton_txt_analizar:hover {
-  outline: 0;
-}
-
-@media (min-width: 768px) {
-  .boton_txt_analizar {
-    font-size: 16px;
-    min-width: 145px;
-  }
 }
 
 .res{
-  color:#ecf3c9;
-  font-size: 16px;
-  font-family: 'Source Serif 4', serif;
+  color: #e3ef86;
+  font-family: 'Red Hat Display', sans-serif;
+  width: 100%;
+  max-width: 100vw;
+  margin-left: 28px;
+  padding: 5px;
+  font-size: 1.5vw;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 70%;
 }
+
+
