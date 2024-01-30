@@ -1,21 +1,10 @@
-import os
-
-from flask import Flask, request, abort, jsonify
-
-from . import MODELS
+from flask import Blueprint, request, abort, jsonify, current_app as app
 
 
-app = Flask(__name__)
-
-# Configuración del proxy
-proxy = os.environ.get("PROXY", "false")
-if proxy == "true":
-    from werkzeug.middleware.proxy_fix import ProxyFix
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1,
-                            x_proto=1, x_host=1, x_prefix=1)
+classifiers = Blueprint('classifiers', __name__)
 
 
-@app.route("/", methods=["POST"])
+@classifiers.route("/", methods=["POST"])
 def main():
     data = request.get_json()
     text = data["text"]
@@ -28,7 +17,7 @@ def main():
     abort(400, description="Bad Request")
 
 
-@app.errorhandler(400)
+@classifiers.errorhandler(400)
 def bad_request(e):
     return jsonify(error=str(e)), 400
 
@@ -49,15 +38,14 @@ def get_gpu_prediction(pipeline, text):
 
 def get_predictions(models: dict, text):
     predictions = {}
-    X = [text]
 
     if "CPU" in models.keys():
         m = models["CPU"]
         labels = m["labels"]
+        vectorizer = m['vectorizer']
+        X = vectorizer.transform([text])
 
-        for name, values in m["models"].items():
-            pipeline = values["pipeline"]
-
+        for name, pipeline in m["models"].items():
             y = pipeline.predict(X)[0]
             predictions[name] = {
                 "label": labels[y],
@@ -73,7 +61,7 @@ def get_predictions(models: dict, text):
 
 
 def identification(text: str):
-    models = MODELS["identification"]
+    models = app.models["identification"]
     return {
         "task": "identification",
         "predictions": get_predictions(models, text),
@@ -81,7 +69,7 @@ def identification(text: str):
 
 
 def attribution(text: str):
-    models = MODELS["attribution"]
+    models = app.models["attribution"]
     return {
         "task": "attribution",
         "predictions": get_predictions(models, text),
