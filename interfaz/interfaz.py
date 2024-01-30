@@ -27,7 +27,7 @@ application.layout = html.Div(className='background', children=[
         # Logo
         html.Div(className='row', children=[
             html.Div(className='twelve columns', style={'textAlign': 'center'}, children=[
-                html.Img(src='/assets/img/logo-uni.png',
+                html.Img(src='assets/img/logo-uni.png',
                          style={'maxWidth': '150px', 'marginBottom': '20px'})
             ])
         ]),
