@@ -1,13 +1,14 @@
 from dash import Dash, html, dcc, dash_table, Output, Input, State, callback
 from dash.exceptions import PreventUpdate
-import plotly.express as px
-import pandas as pd
 import requests
 
 # Inicio de la aplicación
 application = Dash(__name__, external_stylesheets=[
     'https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;900&display=swap'
 ])
+
+footer_text = \
+    'El proyecto ha sido realizado por Alejandro Delgado, Alzaro Álvarez, Brenda Solórzano y Mauro Moltrasio. 2024.'
 
 application.layout = html.Div(className='background', children=[
     html.Div(className='container', children=[
@@ -89,12 +90,12 @@ application.layout = html.Div(className='background', children=[
                 'bottom': '0',
                 'width': '100%'
             }, children=[
-                html.P(
-                    'El proyecto ha sido realizado por Alejandro Delgado, Alzaro Álvarez, Brenda Solórzano y Mauro Moltrasio. 2024.')
+                html.P(footer_text)
             ])
         ])
     ])
 ])
+
 
 # Se llamará a esta función cada vez que se cambie el valor de la entrada para actualizar la salida.
 @callback(
