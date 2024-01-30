@@ -1,6 +1,6 @@
 import os
 
-from dash import Dash, html, dcc, dash_table, Output, Input, State, callback
+from dash import Dash, html, dcc, dash_table, Output, Input, State, callback, get_asset_url
 from dash.exceptions import PreventUpdate
 import requests
 
@@ -27,7 +27,7 @@ application.layout = html.Div(className='background', children=[
         # Logo
         html.Div(className='row', children=[
             html.Div(className='twelve columns', style={'textAlign': 'center'}, children=[
-                html.Img(src='assets/img/logo-uni.png',
+                html.Img(src=get_asset_url('img/logo-uni.png'),
                          style={'maxWidth': '150px', 'marginBottom': '20px'})
             ])
         ]),
