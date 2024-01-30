@@ -4,14 +4,16 @@ import plotly.express as px
 import pandas as pd
 import requests
 
-# Inicio de la aplicación
+# Inicializamos la aplicación
 application = Dash(__name__, external_stylesheets=[
+    'https://codepen.io/chriddyp/pen/bWLwgP.css',
     'https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;900&display=swap'
 ])
 
+# Ajustes responsivos para la disposición de elementos
 application.layout = html.Div(className='background', children=[
     html.Div(className='container', children=[
-
+        
         # Logo
         html.Div(className='row', children=[
             html.Div(className='twelve columns', style={'textAlign': 'center'}, children=[
@@ -19,7 +21,7 @@ application.layout = html.Div(className='background', children=[
                          style={'maxWidth': '150px', 'marginBottom': '20px'})
             ])
         ]),
-
+        
         # Título
         html.Div(className='row', children=[
             html.Div(className='twelve columns', children=[
@@ -34,7 +36,7 @@ application.layout = html.Div(className='background', children=[
                     }
                 ),
                 html.Hr(style={'borderTop': '3px solid #000',
-                        'margin': '20px 0'})
+                        'margin': '20px 0'}) 
             ])
         ]),
 
@@ -76,7 +78,7 @@ application.layout = html.Div(className='background', children=[
                 html.Div(id='resultados_metricas', style={'margin': '20px'}),
             ])
         ]),
-
+        
         # Footer
         html.Div(className='row', children=[
             html.Div(className='twelve columns', style={
