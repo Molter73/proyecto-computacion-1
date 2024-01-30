@@ -1,67 +1,100 @@
 from dash import Dash, html, dcc, dash_table, Output, Input, State, callback
 from dash.exceptions import PreventUpdate
-import plotly.express as px
-import pandas as pd
 import requests
 
-df = pd.read_csv(
-    "https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv"
-)
-font = "https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Source+Serif+4:opsz@8..60&display=swap"
-# Inicializamos la aplicación
-application = Dash(__name__)
+# Inicio de la aplicación
+application = Dash(__name__, external_stylesheets=[
+    'https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;900&display=swap'
+])
 
-application.layout = html.Div(
-    [
-        html.Link(
-            href=font,
-            rel="stylesheet",
-        ),
-        html.Div(
-            [
+footer_text = \
+    'El proyecto ha sido realizado por Alejandro Delgado, Alzaro Álvarez, Brenda Solórzano y Mauro Moltrasio. 2024.'
+
+application.layout = html.Div(className='background', children=[
+    html.Div(className='container', children=[
+
+        # Logo
+        html.Div(className='row', children=[
+            html.Div(className='twelve columns', style={'textAlign': 'center'}, children=[
+                html.Img(src='/assets/img/logo-uni.png',
+                         style={'maxWidth': '150px', 'marginBottom': '20px'})
+            ])
+        ]),
+
+        # Título
+        html.Div(className='row', children=[
+            html.Div(className='twelve columns', children=[
                 html.H1(
-                    className="titulo_app",
-                    children="Inferencia de texto generado por máquina (MGT)",
-                )
-            ]
-        ),
-        html.Div(
-            [html.H3(className="titulo_opciones",
-                     children="Selecciona un modelo")]
-        ),
-        html.Div(
-            className="opciones",
-            children=dcc.RadioItems(
-                options=[
-                    {
-                        "label": "Identificación",
-                        "value": "identification",
-                    },
-                    {
-                        "label": "Atribución",
-                        "value": "attribution",
-                    },
-                ],
-                id="seleccion_modelo",
-            ),
-        ),
-        html.Div([html.H3(className="titulo_opciones",
-                 children="Introduce tu texto")]),
-        html.Div([dcc.Textarea(className="txt_area", id="txt_area", value="")]),
-        html.Button(
-            className="boton_txt_analizar",
-            id="button_txt_area",
-            children="Analizar texto",
-        ),
-    ]
-)
+                    'Inferencia de texto generado por máquina (MGT)',
+                    className='text',
+                    style={
+                        'textAlign': 'center',
+                        'fontFamily': 'Red Hat Display',
+                        'fontWeight': 'bold',
+                        'padding': '10px 10px'
+                    }
+                ),
+                html.Hr(style={'borderTop': '3px solid #000',
+                        'margin': '20px 0'})
+            ])
+        ]),
 
+        # Selector de modelo y área de texto
+        html.Div(className='row', children=[
+            # Selector de modelo
+            html.Div(className='six columns', children=[
+                html.H3(
+                    'Selecciona un modelo',
+                    className='text',
+                    style={'textAlign': 'center'}
+                ),
+                dcc.RadioItems(
+                    options=[
+                        {'label': ' Identificación', 'value': 'identification'},
+                        {'label': ' Atribución', 'value': 'attribution'},
+                    ],
+                    id='seleccion_modelo',
+                    labelStyle={'display': 'block', 'margin': '5px'},
+                    style={'textAlign': 'center', 'fontSize': '18px'}
+                ),
+            ]),
+            # Área de texto
+            html.Div(className='six columns', children=[
+                html.H3(
+                    'Introduce tu texto',
+                    className='text',
+                    style={'textAlign': 'center'}
+                ),
+                dcc.Textarea(id='txt_area', value='', className='textarea'),
+                html.Button('Analizar texto', id='button_txt_area',
+                            n_clicks=0, className='button'),
+            ])
+        ]),
 
-def graphic_features(op_elegida):
-    grafica = px.histogram(
-        df, x="continent", y=op_elegida, histfunc="avg", color="green"
-    )
-    return grafica
+        # Resultados
+        html.Div(className='row', children=[
+            html.Div(className='twelve columns', children=[
+                html.Div(id='resultados_metricas', style={'margin': '20px'}),
+            ])
+        ]),
+
+        # Footer
+        html.Div(className='row', children=[
+            html.Div(className='twelve columns', style={
+                'textAlign': 'center',
+                'padding': '20px 0',
+                'backgroundColor': '#e94619',
+                'color': 'white',
+                'fontSize': '14px',
+                'marginTop': '30px',
+                'bottom': '0',
+                'width': '100%'
+            }, children=[
+                html.P(footer_text)
+            ])
+        ])
+    ])
+])
 
 
 # Se llamará a esta función cada vez que se cambie el valor de la entrada para actualizar la salida.
@@ -75,10 +108,9 @@ def model_selection(n_clicks, classification, text):
     if classification is None or text is None:
         raise PreventUpdate
 
-    response = requests.post("http://127.0.0.1:5000", json={
-        "text": text,
-        "classification": classification
-    })
+    response = requests.post(
+        "http://127.0.0.1:5000", json={"text": text, "classification": classification}
+    )
 
     if not response.ok:
         return html.P(response.json()["error"], className="res")
@@ -88,7 +120,8 @@ def model_selection(n_clicks, classification, text):
             "Modelo": name,
             "Label": values["label"],
             "Probabilidad": values["proba"] if values["proba"] is not None else "NA",
-        } for name, values in response.json()["predictions"].items()
+        }
+        for name, values in response.json()["predictions"].items()
     ]
 
     return dash_table.DataTable(
